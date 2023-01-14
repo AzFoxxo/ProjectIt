@@ -302,7 +302,7 @@ namespace ProjectIt {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
 
             // Store the project name in a variable
@@ -313,7 +313,7 @@ namespace ProjectIt {
                 // If not, print an error message
                 Console.WriteLine("Error: Project does not exist! Run help for more information.");
                 // And exit the program
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
 
             // Read the .projectit file

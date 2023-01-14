@@ -25,6 +25,9 @@ using System.Runtime.InteropServices;
 namespace ProjectIt {
     class Program {
         static void Main(string[] args) {
+            // Set the directory to the directory the command is run in (not the directory the executable is in)
+            Directory.SetCurrentDirectory(Directory.GetCurrentDirectory());
+
             // Store the arguments in a variable
             string[] arguments = args;
 

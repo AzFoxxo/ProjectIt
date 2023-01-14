@@ -1,0 +1,3 @@
+# Exclude bin and obj directories from git
+bin
+obj

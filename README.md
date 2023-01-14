@@ -10,4 +10,5 @@ projectit build <project_name> # Build the project
 projectit delete <project> # Delete the project
 projectit open <project> # Open the project in VSCode
 projectit list # List all the supported languages/frameworks
+projectit add-projectit-file <project> <lang/framework> # Add ProjectIt file to existing project (no validation)
 ```

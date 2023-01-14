@@ -57,6 +57,14 @@ namespace ProjectIt {
                     // List languages/frameworks and projects
                     ListProjects();
                     break;
+                case "open":
+                    // Open the project
+                    OpenProject(arguments);
+                    break;
+                case "delete":
+                    // Delete the project
+                    DeleteProject(arguments);
+                    break;
                 case "help":
                     // Print help
                     PrintHelp();
@@ -68,6 +76,64 @@ namespace ProjectIt {
                     Environment.Exit(0);
                     break;
             }
+        }
+
+        private static void DeleteProject(string[] arguments)
+        {
+            // Check if there are two arguments
+            if (arguments.Length < 2) {
+                // If not, print an error message
+                Console.WriteLine("Error: Not enough arguments! Run help for more information.");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // Check if the project exists
+            if (!Directory.Exists(arguments[1])) {
+                // If not, print an error message
+                Console.WriteLine("Error: Project does not exist!");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // Delete the project
+            try {
+                Directory.Delete(arguments[1], true);
+                Console.WriteLine("Project deleted successfully!");
+            } catch (Exception e) {
+                Console.WriteLine("Error: Could not delete project!");
+                Console.WriteLine(e);
+                Environment.Exit(1);
+            }
+        }
+
+        private static void OpenProject(string[] arguments)
+        {
+            // Check if there are two arguments
+            if (arguments.Length < 2) {
+                // If not, print an error message
+                Console.WriteLine("Error: Not enough arguments! Run help for more information.");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // Check if the project exists
+            if (!Directory.Exists(arguments[1])) {
+                // If not, print an error message
+                Console.WriteLine("Error: Project does not exist!");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // If the project exists, but no .projectit file exists, print an error message
+            if (!File.Exists($"{arguments[1]}/.projectit")) {
+                Console.WriteLine("Error: Project does not have a .projectit file!");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // Open project in VS Code
+            Process.Start("code", arguments[1]);
         }
 
         private static void ListProjects()
@@ -95,6 +161,8 @@ namespace ProjectIt {
             Console.WriteLine("  create [language/framework] [project]");
             Console.WriteLine("  build [project]");
             Console.WriteLine("  list");
+            Console.WriteLine("  open [project]");
+            Console.WriteLine("  delete [project]");
         }
 
         private static void CreateProject(string[] arguments)

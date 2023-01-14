@@ -65,6 +65,10 @@ namespace ProjectIt {
                     // Delete the project
                     DeleteProject(arguments);
                     break;
+                case "add-projectit-file":
+                    // Add .projectit file to project to existing project
+                    AddProjectItFile(arguments);
+                    break;
                 case "help":
                     // Print help
                     PrintHelp();
@@ -76,6 +80,39 @@ namespace ProjectIt {
                     Environment.Exit(0);
                     break;
             }
+        }
+
+        private static void AddProjectItFile(string[] arguments)
+        {
+            // Check argument is provided for name and language/framework
+            if (arguments.Length < 3) {
+                // If not, print an error message
+                Console.WriteLine("Error: Not enough arguments! Run help for more information.");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // Check if the project exists
+            if (!Directory.Exists(arguments[1])) {
+                // If not, print an error message
+                Console.WriteLine("Error: Project does not exist!");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
+            // Check if the project already has a .projectit file
+            if (File.Exists($"{arguments[1]}/.projectit")) {
+                // If so, print an error message
+                Console.WriteLine("Error: Project already has a .projectit file!");
+                // And exit the program
+                Environment.Exit(1);
+            }
+            
+            // Write the language/framework to the .projectit file
+            File.WriteAllText($"{arguments[1]}/.projectit", arguments[2]);
+
+            // Print success message
+            Console.WriteLine("Successfully added .projectit file to project!");
         }
 
         private static void DeleteProject(string[] arguments)
@@ -163,6 +200,7 @@ namespace ProjectIt {
             Console.WriteLine("  list");
             Console.WriteLine("  open [project]");
             Console.WriteLine("  delete [project]");
+            Console.WriteLine("  add-projectit-file [project] [language/framework]");
         }
 
         private static void CreateProject(string[] arguments)

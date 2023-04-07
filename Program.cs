@@ -47,8 +47,12 @@ namespace ProjectIt
         /// <summary> Open and deserialise the JSON </summary>
         public static Root OpenJSON()
         {
+            // Get the path to the executable
+            string executablePath = System.Reflection.Assembly.GetEntryAssembly().Location;
+            string executableDirectory = Path.GetDirectoryName(executablePath);
+
             // Read supported.json to get supported languages/frameworks
-            string json = File.ReadAllText("supported.json");
+            string json = File.ReadAllText(executableDirectory + "/supported.json");
 
             // Deserialize the json into a Root object
             Root root = JsonConvert.DeserializeObject<Root>(json);

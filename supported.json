@@ -1,0 +1,47 @@
+{
+    "programming_languages": [
+        {
+            "name": "csharp",
+            "package_manager": {
+                "name": "nuget",
+                "build": "dotnet build",
+                "build_release": "dotnet build --configuration Release",
+                "run": "dotnet run",
+                "project_types": [
+                    ["console", "dotnet new console -o {required_name}"],
+                    ["lib", "dotnet new classlib -o {required_name}"],
+                    ["web", "dotnet new web -o {required_name}"],
+                    ["webapi", "dotnet new webapi -o {required_name}"],
+                    ["mvc", "dotnet new mvc -o {required_name}"],
+                    ["monogame", "dotnet new mgdesktopgl -o {required_name}"]
+                ]
+            }
+        },
+        {
+            "name": "rust",
+            "package_manager": {
+                "name": "cargo",
+                "build": "cargo build",
+                "build_release": "cargo build --release",
+                "run": "cargo run",
+                "project_types": [
+                    ["console", "cargo new --bin {required_name}"],
+                    ["lib", "cargo new --lib {required_name}"]
+                ]
+            }
+        },
+        {
+            "name": "flutter",
+            "package_manager": {
+                "name": "flutter",
+                "build": "flutter build",
+                "build_release": "flutter build --release",
+                "run": "flutter run",
+                "project_types": [
+                    ["app", "flutter create {required_name}"],
+                    ["lib", "flutter create -t lib {required_name}"]
+                ]
+            }
+        }
+    ]
+}

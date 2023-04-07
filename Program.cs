@@ -1,5 +1,7 @@
 ﻿/*
  *   Copyright (c) 2023 Az Foxxo
+ *   All rights reserved.
+
  *   Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to deal
  *   in the Software without restriction, including without limitation the rights
@@ -21,10 +23,208 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json;
 
-namespace ProjectIt {
-    class Program {
-        static void Main(string[] args) {
+namespace ProjectIt
+{
+    class Program
+    {
+        /// <summary> Execute a command in the terminal </summary>
+        public static void ExecuteCommand(string command)
+        {
+            var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "sh",
+                Arguments = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "/C " : "-c \"") + command + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "" : "\""),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            });
+
+            process.WaitForExit();
+        }
+
+        /// <summary> Open and deserialise the JSON </summary>
+        public static Root OpenJSON()
+        {
+            // Read supported.json to get supported languages/frameworks
+            string json = File.ReadAllText("supported.json");
+
+            // Deserialize the json into a Root object
+            Root root = JsonConvert.DeserializeObject<Root>(json);
+
+            // Return the Root object
+            return root;
+        }
+
+        /// <summary> Return new project command for the specified language/framework </summary>
+        public static string GetNewProjectCommand(string language, string template)
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Loop through the programming languages
+            foreach (ProgrammingLanguage programmingLanguage in root.programming_languages)
+            {
+                // Check if the language is the one we're looking for
+                if (programmingLanguage.name == language)
+                {
+                    // Loop through the supported templates
+                    foreach (List<string> projectType in programmingLanguage.package_manager.project_types)
+                    {
+                        // Check if the template is the one we're looking for
+                        if (projectType[0] == template)
+                        {
+                            // If so, return the new project command
+                            return projectType[1];
+                        }
+                    }
+                }
+            }
+
+            // If the language is not found, return null
+            return null;
+        }
+
+        /// <summary> Return all supported templates in a language/framework </summary>
+        public static string[] GetTemplates(string language)
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Loop through the programming languages
+            foreach (ProgrammingLanguage programmingLanguage in root.programming_languages)
+            {
+                // Check if the language is the one we're looking for
+                if (programmingLanguage.name == language)
+                {
+                    // Create an array of the supported templates
+                    string[] templates = new string[programmingLanguage.package_manager.project_types.Count];
+
+                    // Add the supported templates to the array
+                    for (int i = 0; i < programmingLanguage.package_manager.project_types.Count; i++)
+                    {
+                        templates[i] = programmingLanguage.package_manager.project_types[i][0];
+                    }
+
+                    // Return the array
+                    return templates;
+                }
+            }
+
+            // If the language is not found, return null
+            return null;
+        }
+
+
+        /// <summary> Return an array of the supported languages/frameworks </summary>
+        public static string[] GetSupportedLanguages()
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Create an array of the supported languages/frameworks
+            string[] supportedLanguages = new string[root.programming_languages.Count];
+
+            // Add the supported languages/frameworks to the array
+            for (int i = 0; i < root.programming_languages.Count; i++)
+            {
+                supportedLanguages[i] = root.programming_languages[i].name;
+            }
+
+            // Return the array
+            return supportedLanguages;
+        }
+
+        /// <summary> Return the package manager for the specified language/framework </summary>
+        public static string GetPackageManager(string language)
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Loop through the programming languages
+            foreach (ProgrammingLanguage programmingLanguage in root.programming_languages)
+            {
+                // Check if the language is the one we're looking for
+                if (programmingLanguage.name == language)
+                {
+                    // If so, return the package manager
+                    return programmingLanguage.package_manager.name;
+                }
+            }
+
+            // If the language is not found, return null
+            return null;
+        }
+
+
+        /// <summary> Return the build command for the specified language/framework </summary>
+        public static string GetBuildCommand(string language)
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Loop through the programming languages
+            foreach (ProgrammingLanguage programmingLanguage in root.programming_languages)
+            {
+                // Check if the language is the one we're looking for
+                if (programmingLanguage.name == language)
+                {
+                    // If so, return the build command
+                    return programmingLanguage.package_manager.build;
+                }
+            }
+
+            // If the language is not found, return null
+            return null;
+        }
+
+        /// <summary> Return the build release command for the specified language/framework </summary>
+        public static string GetBuildReleaseCommand(string language)
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Loop through the programming languages
+            foreach (ProgrammingLanguage programmingLanguage in root.programming_languages)
+            {
+                // Check if the language is the one we're looking for
+                if (programmingLanguage.name == language)
+                {
+                    // If so, return the build release command
+                    return programmingLanguage.package_manager.build_release;
+                }
+            }
+
+            // If the language is not found, return null
+            return null;
+        }
+
+
+        /// <summary> Return the run command for the specified language/framework</summary>
+        public static string GetRunCommand(string language)
+        {
+            // Open and deserialise the JSON
+            Root root = OpenJSON();
+
+            // Loop through the programming languages
+            foreach (ProgrammingLanguage programmingLanguage in root.programming_languages)
+            {
+                // Check if the language is the one we're looking for
+                if (programmingLanguage.name == language)
+                {
+                    // If so, return the run command
+                    return programmingLanguage.package_manager.run;
+                }
+            }
+
+            // If the language is not found, return null
+            return null;
+        }
+
+
+        static void Main(string[] args)
+        {
             // Set the directory to the directory the command is run in (not the directory the executable is in)
             Directory.SetCurrentDirectory(Directory.GetCurrentDirectory());
 
@@ -32,7 +232,8 @@ namespace ProjectIt {
             string[] arguments = args;
 
             // Check arguments is one or more
-            if (arguments.Length < 1) {
+            if (arguments.Length < 1)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run with help for more information.");
                 // And exit the program
@@ -40,7 +241,8 @@ namespace ProjectIt {
             }
 
             // Determine which action based on the first arg (run, create, help)
-            switch (arguments[0]) {
+            switch (arguments[0])
+            {
                 case "run":
                     // Run the project
                     RunProject(arguments);
@@ -51,11 +253,15 @@ namespace ProjectIt {
                     break;
                 case "build":
                     // Build the project
-                    BuildProject(arguments);
+                    BuildProjectDev(arguments);
+                    break;
+                case "build-release":
+                    // Build the project in release mode
+                    BuildProjectRelease(arguments);
                     break;
                 case "list":
                     // List languages/frameworks and projects
-                    ListProjects();
+                    ListAllTemplatesAndLanguages();
                     break;
                 case "open":
                     // Open the project
@@ -85,7 +291,8 @@ namespace ProjectIt {
         private static void AddProjectItFile(string[] arguments)
         {
             // Check argument is provided for name and language/framework
-            if (arguments.Length < 3) {
+            if (arguments.Length < 3)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
@@ -93,7 +300,8 @@ namespace ProjectIt {
             }
 
             // Check if the project exists
-            if (!Directory.Exists(arguments[1])) {
+            if (!Directory.Exists(arguments[1]))
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Project does not exist!");
                 // And exit the program
@@ -101,13 +309,23 @@ namespace ProjectIt {
             }
 
             // Check if the project already has a .projectit file
-            if (File.Exists($"{arguments[1]}/.projectit")) {
+            if (File.Exists($"{arguments[1]}/.projectit"))
+            {
                 // If so, print an error message
                 Console.WriteLine("Error: Project already has a .projectit file!");
                 // And exit the program
                 Environment.Exit(1);
             }
-            
+
+            // Check if language/framework is valid (split(":)[0] is the language, split(":")[1] is the framework)
+            if (!GetSupportedLanguages().Contains(arguments[2].Split(":")[0]) || !GetTemplates(arguments[2].Split(":")[0]).Contains(arguments[2].Split(":")[1]))
+            {
+                // If not, print an error message
+                Console.WriteLine("Error: Invalid language/framework!");
+                // And exit the program
+                Environment.Exit(1);
+            }
+
             // Write the language/framework to the .projectit file
             File.WriteAllText($"{arguments[1]}/.projectit", arguments[2]);
 
@@ -118,7 +336,8 @@ namespace ProjectIt {
         private static void DeleteProject(string[] arguments)
         {
             // Check if there are two arguments
-            if (arguments.Length < 2) {
+            if (arguments.Length < 2)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
@@ -126,7 +345,8 @@ namespace ProjectIt {
             }
 
             // Check if the project exists
-            if (!Directory.Exists(arguments[1])) {
+            if (!Directory.Exists(arguments[1]))
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Project does not exist!");
                 // And exit the program
@@ -134,10 +354,13 @@ namespace ProjectIt {
             }
 
             // Delete the project
-            try {
+            try
+            {
                 Directory.Delete(arguments[1], true);
                 Console.WriteLine("Project deleted successfully!");
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine("Error: Could not delete project!");
                 Console.WriteLine(e);
                 Environment.Exit(1);
@@ -147,7 +370,8 @@ namespace ProjectIt {
         private static void OpenProject(string[] arguments)
         {
             // Check if there are two arguments
-            if (arguments.Length < 2) {
+            if (arguments.Length < 2)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
@@ -155,7 +379,8 @@ namespace ProjectIt {
             }
 
             // Check if the project exists
-            if (!Directory.Exists(arguments[1])) {
+            if (!Directory.Exists(arguments[1]))
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Project does not exist!");
                 // And exit the program
@@ -163,29 +388,30 @@ namespace ProjectIt {
             }
 
             // If the project exists, but no .projectit file exists, print an error message
-            if (!File.Exists($"{arguments[1]}/.projectit")) {
+            if (!File.Exists($"{arguments[1]}/.projectit"))
+            {
                 Console.WriteLine("Error: Project does not have a .projectit file!");
                 // And exit the program
                 Environment.Exit(1);
             }
 
             // Open project in VS Code
-            Process.Start("code", arguments[1]);
+            ExecuteCommand($"code {arguments[1]}");
         }
 
-        private static void ListProjects()
+        private static void ListAllTemplatesAndLanguages()
         {
-            // List all supported languages/frameworks
-            Console.WriteLine("Supported languages/frameworks:");
-            Console.WriteLine("  C#:console");
-            Console.WriteLine("  C#:classlib");
-            Console.WriteLine("  Rust:bin");
-            Console.WriteLine("  Rust:lib");
-            Console.WriteLine("  Dart:console");
-            Console.WriteLine("  Dart:lib");
-            Console.WriteLine("  Dart:flutter");    
-            Console.WriteLine("  Dart:lib-flutter");
-            Console.WriteLine("  MonoGame:C#");
+            // List all templates and languages
+            Console.WriteLine("Supported Languages (and Frameworks):");
+            foreach (var programmingLanguage in GetSupportedLanguages())
+            {
+                // For each programming language, get it's project types
+                foreach (var projectType in GetTemplates(programmingLanguage))
+                {
+                    // And print them
+                    Console.WriteLine($"-\t{programmingLanguage}:{projectType}");
+                }
+            }
         }
 
         private static void PrintHelp()
@@ -194,19 +420,21 @@ namespace ProjectIt {
             Console.WriteLine("==============");
             Console.WriteLine("Usage: projectit [command] [arguments]");
             Console.WriteLine("Commands:");
-            Console.WriteLine("  run [project]");
-            Console.WriteLine("  create [language/framework] [project]");
-            Console.WriteLine("  build [project]");
-            Console.WriteLine("  list");
-            Console.WriteLine("  open [project]");
-            Console.WriteLine("  delete [project]");
-            Console.WriteLine("  add-projectit-file [project] [language/framework]");
+            Console.WriteLine("-\trun [project]");
+            Console.WriteLine("-\tcreate [language/framework] [project]");
+            Console.WriteLine("-\tbuild [project]");
+            Console.WriteLine("-\tbuild-release [project]");
+            Console.WriteLine("-\tlist");
+            Console.WriteLine("-\topen [project]");
+            Console.WriteLine("-\tdelete [project]");
+            Console.WriteLine("-\tadd-projectit-file [project] [language/framework]");
         }
 
         private static void CreateProject(string[] arguments)
         {
             // Check if there are three arguments
-            if (arguments.Length < 3) {
+            if (arguments.Length < 3)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
@@ -214,129 +442,107 @@ namespace ProjectIt {
             }
 
             // Store the language/framework and project name in variables
-            string language = arguments[1];
-            
+            string target = arguments[1];
+
             // Store the project name in a variable
             string project = arguments[2];
 
             var command = "";
 
-            // Determine which language/framework to use
-
-            // C#
-            if (language == "C#:console") command = $"dotnet new console -o {project}";
-            if (language == "C#:classlib") command = $"dotnet new classlib -o {project}";
-            
-            // Rust
-            if (language == "Rust:bin") command = $"cargo new {project}";
-            if (language == "Rust:lib") command = $"cargo new {project} --lib";
-
-            // Dart
-            if (language == "Dart:console") command = $"dart create {project}";
-            if (language == "Dart:lib") command = $"dart create -t lib {project}";
-
-            // Flutter
-            if (language == "Dart:flutter") command = $"flutter create {project}";
-            if (language == "Dart:lib-flutter") command = $"flutter create -t lib {project}";
-
-            // MonoGame
-            if (language == "MonoGame:C#") command = $"dotnet new mgdesktopgl -o {project}";
+            // Retrieve the command to create the project
+            foreach (var programmingLanguage in GetSupportedLanguages())
+            {
+                // For each programming language, get it's project types
+                foreach (var projectType in GetTemplates(programmingLanguage))
+                {
+                    // If the language/framework is supported, store the command
+                    if (target == $"{programmingLanguage}:{projectType}")
+                    {
+                        command = GetNewProjectCommand(programmingLanguage, projectType);
+                    }
+                }
+            }
 
             // If the language/framework is not supported, print an error message
-            if (command == "") {
+            if (command == "" || command == null)
+            {
                 Console.WriteLine("Error: Language/framework not supported! Run list for more information.");
                 // And exit the program
                 Environment.Exit(1);
             }
 
             // If folder or directory already exists, print an error message
-            if (Directory.Exists(project) || File.Exists(project)) {
+            if (Directory.Exists(project) || File.Exists(project))
+            {
                 Console.WriteLine("Error: Conflict! A folder or directory with that name already exists.");
                 // And exit the program
                 Environment.Exit(1);
             }
 
-            // Create project (linux and mac and windows)
-            var process = new Process();
-            process.StartInfo.FileName = "sh";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) process.StartInfo.FileName = "cmd";
-            process.StartInfo.Arguments = $"-c \"{command}\"";
-            process.Start();
-            process.WaitForExit();
+            // Create project
+            command = command.Replace("{required_name}", project);
+            ExecuteCommand(command);
 
-            // Open project in VS Code
-            var process2 = new Process();
-            process2.StartInfo.FileName = "sh";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) process2.StartInfo.FileName = "cmd";
-            process2.StartInfo.Arguments = $"-c \"code {project}\"";
-            process2.Start();
-            process2.WaitForExit();
+            // Check if the directory exists
+            if (!Directory.Exists(project))
+            {
+                // If not, print an error message
+                Console.WriteLine("Error: Project could not be created!");
+                // And exit the program
+                Environment.Exit(1);
+            }
 
-            // Create a file in the project directory called .projectit
-            File.WriteAllText($"{project}/.projectit", language);
+            // Create .projectit file in project directory
+            CreateProjectitFile(project, target);
+        }
+
+        private static void CreateProjectitFile(string project, string target)
+        {
+            // Create a file called .projectit in the project directory
+            File.WriteAllText($"{project}/.projectit", target);
         }
 
         private static void RunProject(string[] arguments)
         {
             // Check if argument for project is provided
-            if (arguments.Length < 2) {
+            if (arguments.Length < 0)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
 
             // Store the project name in a variable
             string project = arguments[1];
 
             // Check if the project exists by checking if the .projectit file exists
-            if (!File.Exists($"{project}/.projectit")) {
+            if (!File.Exists($"{project}/.projectit"))
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Project does not exist! Run help for more information.");
                 // And exit the program
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
 
             // Read the .projectit file
-            string language = File.ReadAllText($"{project}/.projectit");
+            string language = File.ReadAllText($"{project}/.projectit").Split(':')[0];
 
-            // Determine which language/framework to use
-            var command = "";
+            // Change directory to project
+            Console.WriteLine($"Changing directory to {project}");
 
-            // C#
-            if (language == "C#:console") command = $"cd {project} && dotnet run";
-            if (language == "C#:classlib") { Console.WriteLine("Error: Cannot run a classlib project!"); Environment.Exit(0); }
-
-            // Rust
-            if (language == "Rust:bin") command = $"cd {project} && cargo run";
-            if (language == "Rust:lib") { Console.WriteLine("Error: Cannot run a library project!"); Environment.Exit(0); }
-
-            // Dart
-            if (language == "Dart:console") command = $"cd {project} && dart run";
-            if (language == "Dart:lib") { Console.WriteLine("Error: Cannot run a library project!"); Environment.Exit(0); }
-
-            // Flutter
-            if (language == "Dart:flutter") command = $"cd {project} && flutter run";
-            if (language == "Dart:lib-flutter") { Console.WriteLine("Error: Cannot run a library project!"); Environment.Exit(0); }
-
-            // MonoGame
-            if (language == "MonoGame:C#") command = $"cd {project} && dotnet run";
-
-            // Run project (linux and mac and windows)
-            var process = new Process();
-            process.StartInfo.FileName = "sh";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) process.StartInfo.FileName = "cmd";
-            process.StartInfo.Arguments = $"-c \"{command}\"";
-            process.Start();
-            process.WaitForExit();
+            // Run project
+            ExecuteCommand($"cd {project} && {GetRunCommand(language)}");
 
             // Exit the program
             Environment.Exit(0);
         }
 
-        private static void BuildProject(string[] arguments) {
+        private static void BuildProjectDev(string[] arguments)
+        {
             // Check if argument for project is provided
-            if (arguments.Length < 2) {
+            if (arguments.Length < 0)
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Not enough arguments! Run help for more information.");
                 // And exit the program
@@ -347,7 +553,8 @@ namespace ProjectIt {
             string project = arguments[1];
 
             // Check if the project exists by checking if the .projectit file exists
-            if (!File.Exists($"{project}/.projectit")) {
+            if (!File.Exists($"{project}/.projectit"))
+            {
                 // If not, print an error message
                 Console.WriteLine("Error: Project does not exist! Run help for more information.");
                 // And exit the program
@@ -355,37 +562,49 @@ namespace ProjectIt {
             }
 
             // Read the .projectit file
-            string language = File.ReadAllText($"{project}/.projectit");
+            string language = File.ReadAllText($"{project}/.projectit").Split(':')[0];
 
-            // Determine which language/framework to use
-            var command = "";
+            // Change directory to project
+            Console.WriteLine($"Changing directory to {project}");
 
-            // C#
-            if (language == "C#:console") command = $"cd {project} && dotnet build";
-            if (language == "C#:classlib") command = $"cd {project} && dotnet build";
+            // Build project
+            ExecuteCommand($"cd {project} && {GetBuildCommand(language)}");
 
-            // Rust
-            if (language == "Rust:bin") command = $"cd {project} && cargo build";
-            if (language == "Rust:lib") command = $"cd {project} && cargo build";
+            // Exit the program
+            Environment.Exit(0);
+        }
 
-            // Dart
-            if (language == "Dart:console") command = $"cd {project} && dart compile exe bin/main.dart";
-            if (language == "Dart:lib") command = $"cd {project} && dart compile exe bin/main.dart";
+        private static void BuildProjectRelease(string[] arguments)
+        {
+            // Check if argument for project is provided
+            if (arguments.Length < 0)
+            {
+                // If not, print an error message
+                Console.WriteLine("Error: Not enough arguments! Run help for more information.");
+                // And exit the program
+                Environment.Exit(1);
+            }
 
-            // Flutter
-            if (language == "Dart:flutter") command = $"cd {project} && flutter build";
-            if (language == "Dart:lib-flutter") command = $"cd {project} && flutter build";
+            // Store the project name in a variable
+            string project = arguments[1];
 
-            // MonoGame
-            if (language == "MonoGame:C#") command = $"cd {project} && dotnet build";
+            // Check if the project exists by checking if the .projectit file exists
+            if (!File.Exists($"{project}/.projectit"))
+            {
+                // If not, print an error message
+                Console.WriteLine("Error: Project does not exist! Run help for more information.");
+                // And exit the program
+                Environment.Exit(1);
+            }
 
-            // Build project (linux and mac and windows)
-            var process = new Process();
-            process.StartInfo.FileName = "sh";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) process.StartInfo.FileName = "cmd";
-            process.StartInfo.Arguments = $"-c \"{command}\"";
-            process.Start();
-            process.WaitForExit();
+            // Read the .projectit file
+            string language = File.ReadAllText($"{project}/.projectit").Split(':')[0];
+
+            // Change directory to project
+            Console.WriteLine($"Changing directory to {project}");
+
+            // Build project
+            ExecuteCommand($"cd {project} && {GetBuildReleaseCommand(language)}");
 
             // Exit the program
             Environment.Exit(0);
